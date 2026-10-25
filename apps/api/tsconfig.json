@@ -1,0 +1,25 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "Node10",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "types": [
+      "node",
+      "jest"
+    ],
+    "outDir": "dist",
+    "incremental": true,
+    "sourceMap": true,
+    "ignoreDeprecations": "6.0"
+  },
+  "include": [
+    "src/**/*.ts",
+    "prisma/seed-admin.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}

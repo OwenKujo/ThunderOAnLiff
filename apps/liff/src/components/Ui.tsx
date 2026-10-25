@@ -1,0 +1,7 @@
+import type { ReactNode } from 'react';
+export function ScreenHeader({ kicker, title, description, action }: { kicker?: string; title: string; description?: string; action?: ReactNode }) { return <header className="screen-header"><div>{kicker && <p className="kicker">{kicker}</p>}<h1>{title}</h1>{description && <p className="screen-description">{description}</p>}</div>{action}</header>; }
+export function LoadingState({ text = 'Loading your training plan…' }: { text?: string }) { return <div className="liff-state"><span className="spinner" />{text}</div>; }
+export function ErrorState({ message, retry }: { message: string; retry?: () => void }) { return <div className="liff-error"><strong>Something went wrong</strong><span>{message}</span>{retry && <button className="action-button secondary" onClick={retry}>Try again</button>}</div>; }
+export function EmptyState({ title, message }: { title: string; message?: string }) { return <div className="liff-empty"><span className="empty-symbol">◇</span><strong>{title}</strong>{message && <span>{message}</span>}</div>; }
+export function StatusPill({ status }: { status: string }) { return <span className={`status-pill status-${status.toLowerCase().replaceAll('_', '-')}`}>{status.replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase())}</span>; }
+export function Field({ label, children }: { label: string; children: ReactNode }) { return <label className="liff-field"><span>{label}</span>{children}</label>; }

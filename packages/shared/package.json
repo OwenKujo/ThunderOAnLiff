@@ -1,0 +1,8 @@
+{
+  "name": "@thunder/shared",
+  "private": true,
+  "version": "0.2.0",
+  "type": "module",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": { "typecheck": "tsc --noEmit --strict --skipLibCheck --target ES2022 --module ESNext --moduleResolution Bundler src/index.ts" }
+}

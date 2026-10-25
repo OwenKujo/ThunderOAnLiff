@@ -1,0 +1,331 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+enum MemberStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
+  EXPIRED
+}
+
+enum PackageType {
+  PERSONAL_TRAINING
+  MONTHLY_UNLIMITED
+  TEN_SESSIONS
+  CUSTOM
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+enum BookingStatus {
+  BOOKED
+  CANCELLED
+  CHECKED_IN
+  ATTENDED
+  NO_SHOW
+  COMPLETED
+}
+
+enum AttendanceStatus {
+  CHECKED_IN
+  ATTENDED
+  NO_SHOW
+  CANCELLED
+}
+
+enum NotificationType {
+  BOOKING_CONFIRMATION
+  BOOKING_CANCELLATION
+  CHECK_IN
+  PAYMENT
+  REMINDER
+}
+
+enum NotificationChannel {
+  LINE_OA
+  LINE_LIFF
+  EMAIL
+}
+
+enum AdminRole {
+  ADMIN
+  MANAGER
+}
+
+enum ClassStatus {
+  OPEN
+  CLOSED
+  CANCELLED
+}
+
+model Trainee {
+  id                  String               @id @default(cuid())
+  firstName           String
+  lastName            String
+  phone               String?
+  email               String?              @unique
+  // Kept for migration compatibility; LineAccount is the source of truth for linked accounts.
+  lineUserId          String?              @unique
+  memberStatus        MemberStatus         @default(PENDING)
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  lineAccounts        LineAccount[]
+  linkCodes           TraineeLinkCode[]
+  payments            PaymentRecord[]
+  packageEntitlements PackageEntitlement[]
+  bookings            Booking[]
+  attendance          Attendance[]
+  creditLedger        CreditLedger[]
+  notificationLogs    NotificationLog[]
+  auditLogs           AuditLog[]
+
+  @@index([memberStatus, createdAt])
+  @@index([lastName, firstName])
+}
+
+model TraineeLinkCode {
+  id                String    @id @default(cuid())
+  traineeId         String
+  codeHash          String    @unique
+  expiresAt         DateTime
+  consumedAt        DateTime?
+  createdByAdminId  String?
+  createdAt         DateTime  @default(now())
+  trainee           Trainee   @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+
+  @@index([traineeId, expiresAt])
+}
+
+model LineAccount {
+  id          String   @id @default(cuid())
+  traineeId   String
+  lineUserId  String   @unique
+  displayName String?
+  pictureUrl  String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  trainee Trainee @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+
+  @@index([traineeId])
+}
+
+model AdminUser {
+  id           String     @id @default(cuid())
+  email        String     @unique
+  passwordHash String
+  role         AdminRole  @default(ADMIN)
+  isActive     Boolean    @default(true)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  auditLogs    AuditLog[]
+}
+
+model Package {
+  id           String               @id @default(cuid())
+  name         String
+  type         PackageType
+  priceCents   Int
+  sessionCount Int?
+  durationDays Int?
+  description  String?
+  isActive     Boolean              @default(true)
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
+  entitlements PackageEntitlement[]
+  payments     PaymentRecord[]
+
+  @@index([isActive, type])
+}
+
+model PackageEntitlement {
+  id                String    @id @default(cuid())
+  traineeId         String
+  packageId         String
+  startDate         DateTime
+  endDate           DateTime?
+  // Number of unspent sessions available to book. Unlimited packages use null.
+  remainingSessions Int?
+  isActive          Boolean   @default(true)
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  trainee     Trainee        @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  package     Package        @relation(fields: [packageId], references: [id], onDelete: Restrict)
+  payments    PaymentRecord[]
+  bookings    Booking[]
+  creditLedger CreditLedger[]
+
+  @@index([traineeId, isActive, endDate])
+  @@index([packageId])
+}
+
+model PaymentRecord {
+  id               String        @id @default(cuid())
+  traineeId        String
+  packageId        String?
+  entitlementId    String?
+  amountCents      Int
+  paymentMethod    String
+  paymentReference String?
+  status           PaymentStatus @default(PENDING)
+  paidAt           DateTime?
+  notes            String?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  trainee     Trainee             @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  package     Package?            @relation(fields: [packageId], references: [id], onDelete: SetNull)
+  entitlement PackageEntitlement? @relation(fields: [entitlementId], references: [id], onDelete: SetNull)
+
+  @@index([traineeId, status])
+  @@index([status, createdAt])
+}
+
+model Trainer {
+  id        String          @id @default(cuid())
+  name      String
+  specialty String?
+  isActive  Boolean         @default(true)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  schedules ClassSchedule[]
+
+  @@index([isActive, name])
+}
+
+model ClassSchedule {
+  id        String      @id @default(cuid())
+  trainerId String
+  title     String
+  startAt   DateTime
+  endAt     DateTime
+  location  String?
+  capacity  Int         @default(12)
+  status    ClassStatus @default(OPEN)
+  notes     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  trainer    Trainer      @relation(fields: [trainerId], references: [id], onDelete: Restrict)
+  bookings   Booking[]
+  attendance Attendance[]
+
+  @@index([trainerId, startAt])
+  @@index([status, startAt])
+}
+
+model Booking {
+  id                 String        @id @default(cuid())
+  traineeId          String
+  classScheduleId    String
+  entitlementId      String?
+  status             BookingStatus @default(BOOKED)
+  bookedAt           DateTime      @default(now())
+  cancelledAt        DateTime?
+  cancellationReason String?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+
+  trainee          Trainee             @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  classSchedule    ClassSchedule       @relation(fields: [classScheduleId], references: [id], onDelete: Cascade)
+  entitlement      PackageEntitlement? @relation(fields: [entitlementId], references: [id], onDelete: SetNull)
+  attendance       Attendance?
+  creditLedger     CreditLedger[]
+  notificationLogs NotificationLog[]
+
+  @@index([traineeId, status, bookedAt])
+  @@index([classScheduleId, status])
+  @@index([entitlementId])
+}
+
+model CreditLedger {
+  id             String   @id @default(cuid())
+  traineeId      String
+  entitlementId  String?
+  bookingId      String?
+  amount         Int
+  balanceAfter   Int
+  reason         String
+  idempotencyKey String?  @unique
+  createdAt      DateTime @default(now())
+
+  trainee     Trainee             @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  entitlement PackageEntitlement? @relation(fields: [entitlementId], references: [id], onDelete: SetNull)
+  booking     Booking?            @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@index([traineeId, createdAt])
+  @@index([bookingId])
+  @@index([entitlementId])
+}
+
+model Attendance {
+  id              String           @id @default(cuid())
+  traineeId       String
+  bookingId       String           @unique
+  classScheduleId String
+  status          AttendanceStatus @default(CHECKED_IN)
+  checkedInAt     DateTime?
+  attendedAt      DateTime?
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  trainee       Trainee       @relation(fields: [traineeId], references: [id], onDelete: Cascade)
+  booking       Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  classSchedule ClassSchedule @relation(fields: [classScheduleId], references: [id], onDelete: Cascade)
+
+  @@index([traineeId, status])
+  @@index([classScheduleId, status])
+}
+
+model NotificationLog {
+  id        String              @id @default(cuid())
+  traineeId String?
+  bookingId String?
+  type      NotificationType
+  channel   NotificationChannel
+  status    String              @default("queued")
+  payload   String?
+  error     String?
+  sentAt    DateTime?
+  createdAt DateTime            @default(now())
+
+  trainee Trainee? @relation(fields: [traineeId], references: [id], onDelete: SetNull)
+  booking Booking? @relation(fields: [bookingId], references: [id], onDelete: SetNull)
+
+  @@index([traineeId, createdAt])
+  @@index([bookingId])
+  @@index([status, createdAt])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  traineeId   String?
+  adminUserId String?
+  action      String
+  entityType  String
+  entityId    String?
+  details     String?
+  createdAt   DateTime @default(now())
+
+  trainee   Trainee?   @relation(fields: [traineeId], references: [id], onDelete: SetNull)
+  adminUser AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: SetNull)
+
+  @@index([traineeId, createdAt])
+  @@index([adminUserId, createdAt])
+  @@index([entityType, entityId])
+}

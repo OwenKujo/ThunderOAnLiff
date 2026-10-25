@@ -1,0 +1,33 @@
+{
+  "name": "thunder-oan-liff",
+  "private": true,
+  "version": "0.2.0",
+  "packageManager": "pnpm@9.15.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "pnpm -r --parallel dev",
+    "dev:api": "pnpm --filter @thunder/api dev",
+    "dev:liff": "pnpm --filter @thunder/liff dev",
+    "dev:admin": "pnpm --filter @thunder/admin dev",
+    "build": "pnpm --filter @thunder/api build && pnpm --filter @thunder/liff build && pnpm --filter @thunder/admin build",
+    "build:api": "pnpm --filter @thunder/api build",
+    "build:liff": "pnpm --filter @thunder/liff build",
+    "build:admin": "pnpm --filter @thunder/admin build",
+    "docker:db": "docker compose up -d postgres",
+    "db:migrate": "pnpm --filter @thunder/api prisma:migrate",
+    "db:deploy": "pnpm --filter @thunder/api prisma:deploy",
+    "db:seed-admin": "pnpm --filter @thunder/api db:seed-admin",
+    "lint": "eslint \"apps/**/*.{ts,tsx}\" \"packages/**/*.{ts,tsx}\""
+  },
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "devDependencies": {
+    "eslint": "^10.13.0",
+    "typescript": "^6.0.0",
+    "typescript-eslint": "^8.72.0"
+  }
+}

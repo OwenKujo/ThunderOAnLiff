@@ -1,0 +1,6 @@
+import { AttendanceStatus } from '@prisma/client';
+import { IsEnum, IsOptional, IsString, MaxLength } from 'class-validator';
+export class UpdateAttendanceDto {
+  @IsEnum(AttendanceStatus) status!: AttendanceStatus;
+  @IsOptional() @IsString() @MaxLength(1000) notes?: string;
+}
