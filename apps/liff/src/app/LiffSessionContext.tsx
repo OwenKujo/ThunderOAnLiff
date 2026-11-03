@@ -12,9 +12,14 @@ export function LiffSessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     let cancelled = false;
     async function initialize() {
-      const liffId = import.meta.env.VITE_LIFF_ID as string | undefined;
+      const liffId = (import.meta.env.VITE_LIFF_ID || '').trim();
       if (!liffId) {
-        setSession({ loading: false, token: null, profile: null, error: 'LIFF is not configured. Set VITE_LIFF_ID in the frontend environment and restart the dev server.' });
+        setSession({
+          loading: false,
+          token: null,
+          profile: null,
+          error: 'This frontend deployment was built without VITE_LIFF_ID. In the Vercel project serving this exact URL, open Settings → Environment Variables, add VITE_LIFF_ID using the LIFF app ID (not the LINE Login channel ID), enable Production, and create a new deployment.',
+        });
         return;
       }
       try {
@@ -24,13 +29,14 @@ export function LiffSessionProvider({ children }: { children: ReactNode }) {
           return;
         }
         const token = liff.getIDToken();
-        if (!token) throw new Error('No LINE ID token was returned. Make sure the LIFF channel has the openid scope enabled.');
+        if (!token) throw new Error('No LINE ID token was returned. Make sure the LIFF app has the openid scope enabled.');
         const profile = await liff.getProfile().catch(() => null);
         // Exchange the LINE ID token once. The API verifies it with LINE and returns a short-lived app session.
         // Subsequent API requests are verified locally instead of calling LINE's verification endpoint every time.
         const applicationSession = await liffApi.publicPost<ApplicationSessionResponse>('/auth/line/session', { idToken: token });
         if (!cancelled) setSession({
-          loading: false, token: applicationSession.accessToken,
+          loading: false,
+          token: applicationSession.accessToken,
           profile: profile ? { userId: profile.userId, displayName: profile.displayName, pictureUrl: profile.pictureUrl } : null,
           error: null,
         });
