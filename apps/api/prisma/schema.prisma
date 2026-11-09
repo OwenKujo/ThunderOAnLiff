@@ -209,7 +209,7 @@ model Trainer {
 
 model ClassSchedule {
   id        String      @id @default(cuid())
-  trainerId String
+  trainerId String?
   title     String
   startAt   DateTime
   endAt     DateTime
@@ -220,7 +220,7 @@ model ClassSchedule {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
-  trainer    Trainer      @relation(fields: [trainerId], references: [id], onDelete: Restrict)
+  trainer    Trainer?     @relation(fields: [trainerId], references: [id], onDelete: SetNull)
   bookings   Booking[]
   attendance Attendance[]
 

@@ -33,7 +33,7 @@ export class DashboardService {
       activeMembers, todayClasses, bookedSeats, pendingPayments, packagesNearExpiry, todayCheckIns,
       todayBookings: todayBookings.map((b) => ({
         bookingId: b.id, traineeName: `${b.trainee.firstName} ${b.trainee.lastName}`,
-        className: b.classSchedule.title, trainer: b.classSchedule.trainer.name,
+        className: b.classSchedule.title, trainer: b.classSchedule.trainer?.name ?? 'No trainer assigned',
         startAt: b.classSchedule.startAt, status: b.status, checkedInAt: b.attendance?.checkedInAt ?? null,
       })),
     };
@@ -65,7 +65,7 @@ export class DashboardService {
       upcomingBookings: upcomingBookings.map((booking) => ({
         id: booking.id, classScheduleId: booking.classScheduleId, className: booking.classSchedule.title,
         startAt: booking.classSchedule.startAt, endAt: booking.classSchedule.endAt,
-        trainer: booking.classSchedule.trainer.name, location: booking.classSchedule.location,
+        trainer: booking.classSchedule.trainer?.name ?? 'No trainer assigned', location: booking.classSchedule.location,
         status: booking.status, checkedInAt: booking.attendance?.checkedInAt ?? null,
       })),
       attendanceRate: totalAttendances ? Math.round((attendedCount / totalAttendances) * 100) : null,

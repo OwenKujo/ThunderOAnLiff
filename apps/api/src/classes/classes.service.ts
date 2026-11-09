@@ -35,14 +35,17 @@ export class ClassesService {
     }
     try {
       return await this.prisma.$transaction(async (tx) => {
-        const trainer = await tx.trainer.findFirst({ where: { id: input.trainerId, isActive: true } });
-        if (!trainer) throw new BadRequestException('The selected trainer is not active.');
-        const overlap = await tx.classSchedule.findFirst({
-          where: { trainerId: input.trainerId, status: { not: ClassStatus.CANCELLED }, startAt: { lt: endAt }, endAt: { gt: startAt } },
-        });
-        if (overlap) throw new BadRequestException('The trainer already has a class scheduled during this time.');
+        const trainerId = input.trainerId?.trim() || null;
+        if (trainerId) {
+          const trainer = await tx.trainer.findFirst({ where: { id: trainerId, isActive: true } });
+          if (!trainer) throw new BadRequestException('The selected trainer is not active.');
+          const overlap = await tx.classSchedule.findFirst({
+            where: { trainerId, status: { not: ClassStatus.CANCELLED }, startAt: { lt: endAt }, endAt: { gt: startAt } },
+          });
+          if (overlap) throw new BadRequestException('The trainer already has a class scheduled during this time.');
+        }
         const created = await tx.classSchedule.create({
-          data: { title: input.title.trim(), trainerId: input.trainerId, startAt, endAt, capacity: input.capacity, location: input.location?.trim() || null, notes: input.notes?.trim() || null },
+          data: { title: input.title.trim(), trainerId, startAt, endAt, capacity: input.capacity, location: input.location?.trim() || null, notes: input.notes?.trim() || null },
           include: { trainer: { select: { id: true, name: true } } },
         });
         await tx.auditLog.create({
@@ -52,7 +55,7 @@ export class ClassesService {
       }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable, timeout: 10000 });
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2034') {
-        throw new BadRequestException('The trainer schedule changed while saving. Refresh the schedule and try again.');
+        throw new BadRequestException('The class schedule changed while saving. Refresh the schedule and try again.');
       }
       throw error;
     }

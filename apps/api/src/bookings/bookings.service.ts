@@ -141,7 +141,7 @@ export class BookingsService {
       bookingId: booking.id,
       classTitle: booking.classSchedule.title,
       startsAt: booking.classSchedule.startAt,
-      trainerName: booking.classSchedule.trainer.name,
+      trainerName: booking.classSchedule.trainer?.name ?? 'No trainer assigned',
     });
     return booking;
   }

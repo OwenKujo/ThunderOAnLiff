@@ -29,9 +29,9 @@ export interface TraineeRecord {
   packageEntitlements?: Array<PackageEntitlement>;
 }
 export interface ClassRecord {
-  id: string; title: string; trainerId: string; startAt: string; endAt: string; location: string | null;
+  id: string; title: string; trainerId: string | null; startAt: string; endAt: string; location: string | null;
   capacity: number; status: ClassStatus; notes: string | null;
-  trainer: Trainer; bookedCount: number; spotsRemaining: number;
+  trainer: Trainer | null; bookedCount: number; spotsRemaining: number;
 }
 export interface AttendanceRecord {
   id: string; status: AttendanceStatus; checkedInAt: string | null; attendedAt: string | null; notes: string | null;
