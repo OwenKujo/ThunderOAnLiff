@@ -1,0 +1,5 @@
+.language-switcher{flex:0 0 auto;min-width:42px;padding:6px 9px;border:1px solid #393941;border-radius:7px;background:#1c1c21;color:#f3f1ee;font-size:11px;font-weight:700;line-height:1.2}
+.language-switcher:hover{border-color:#f05342;color:#ff9b8e}
+.login-panel{position:relative}
+.login-panel>.language-switcher{position:absolute;top:20px;right:22px}
+@media(max-width:600px){.topbar-actions{gap:10px}.topbar-date{display:none}.account-meta{display:none}.language-switcher{min-width:38px}}

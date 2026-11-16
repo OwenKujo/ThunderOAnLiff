@@ -119,6 +119,7 @@ This is only valid if the live database really matches the baseline. If it has d
 - LINE check-in validates the signed webhook, matched LINE account, booking ownership, active membership, and the configured check-in window (30 minutes before to 15 minutes after start). Duplicate check-in requests do not create duplicate attendance.
 - Manual payment confirmation creates the entitlement and updates payment/member state in one database transaction.
 - API failures are shown as errors; the frontends do not replace failed requests with fabricated sample metrics.
+- The admin and member web apps support English and Thai, with Thai as the default. Use the `EN` / `ไทย` control to switch; the choice is stored in browser local storage and applies to interface text and date formatting, not API content or LINE notifications.
 
 ## Feature/module map
 

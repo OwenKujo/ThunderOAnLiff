@@ -1,3 +1,5 @@
+export { languageLocale, translate, type AppLanguage } from './language';
+
 export type MemberStatus = 'PENDING' | 'ACTIVE' | 'SUSPENDED' | 'EXPIRED';
 export type PackageType = 'PERSONAL_TRAINING' | 'MONTHLY_UNLIMITED' | 'TEN_SESSIONS' | 'CUSTOM';
 export type PaymentStatus = 'PENDING' | 'PAID' | 'FAILED' | 'REFUNDED';

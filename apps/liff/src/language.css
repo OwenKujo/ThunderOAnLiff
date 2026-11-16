@@ -1,0 +1,5 @@
+.language-switcher{flex:0 0 auto;min-width:42px;padding:6px 9px;border:1px solid #414149;border-radius:7px;background:#18181c;color:#f3f1ee;font-size:11px;font-weight:700;line-height:1.2}
+.language-switcher:hover{border-color:#f05342;color:#ff9b8e}
+.liff-loading-screen,.config-error-screen{position:relative}
+.liff-loading-screen>.language-switcher,.config-error-screen>.language-switcher{position:absolute;top:18px;right:18px}
+@media(max-width:420px){.liff-topbar{padding:0 12px;gap:8px}.profile-chip{max-width:118px}.profile-chip strong{max-width:70px}}

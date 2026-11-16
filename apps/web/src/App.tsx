@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { NavLink, Route, Routes, BrowserRouter } from 'react-router-dom';
+import { LanguageProvider, LanguageSwitcher, useLanguage } from './LanguageContext';
+import './language.css';
 
 type DashboardData = {
   userName: string;
@@ -48,10 +50,11 @@ const schedule = [
 ];
 
 function AppShell() {
+  const { t } = useLanguage();
   const navItems = [
-    { label: 'Trainee', to: '/trainee' },
-    { label: 'Admin', to: '/admin' },
-    { label: 'Schedule', to: '/schedule' },
+    { label: t('Trainee'), to: '/trainee' },
+    { label: t('Admin'), to: '/admin' },
+    { label: t('Schedule'), to: '/schedule' },
   ];
 
   return (
@@ -61,17 +64,18 @@ function AppShell() {
           <div className="brand-mark">TM</div>
           <div>
             <div className="brand-name">Thunder Muaythai</div>
-            <div className="brand-subtitle">Member system</div>
+            <div className="brand-subtitle">{t('Member system')}</div>
           </div>
         </div>
 
-        <nav className="main-nav" aria-label="Main navigation">
+        <nav className="main-nav" aria-label={t('Main navigation')}>
           {navItems.map((item) => (
             <NavLink key={item.to} to={item.to} className={({ isActive }) => (isActive ? 'nav-link active' : 'nav-link')}>
               {item.label}
             </NavLink>
           ))}
         </nav>
+        <LanguageSwitcher />
       </header>
 
       <main className="content-area">
@@ -87,6 +91,7 @@ function AppShell() {
 }
 
 function TraineeDashboard() {
+  const { t } = useLanguage();
   const [data, setData] = useState<DashboardData | null>(null);
 
   useEffect(() => {
@@ -114,41 +119,41 @@ function TraineeDashboard() {
     <section className="page-grid">
       <div className="panel hero-panel">
         <div>
-          <p className="eyebrow">Trainee overview</p>
-          <h1>Welcome back, {data?.userName ?? 'Nattapon'}</h1>
+          <p className="eyebrow">{t('Trainee overview')}</p>
+          <h1>{t('Welcome back')}, {data?.userName ?? 'Nattapon'}</h1>
         </div>
 
         <div className="hero-metrics">
           <div className="metric-card accent">
-            <span className="metric-label">Status</span>
-            <strong>{data?.memberStatus ?? 'Active'}</strong>
+            <span className="metric-label">{t('Status')}</span>
+            <strong>{t(data?.memberStatus ?? 'Active')}</strong>
           </div>
           <div className="metric-card">
-            <span className="metric-label">Package</span>
-            <strong>{data?.packageName ?? '10 Sessions'}</strong>
+            <span className="metric-label">{t('Package')}</span>
+            <strong>{data?.packageName ?? t('10 Sessions')}</strong>
           </div>
           <div className="metric-card">
-            <span className="metric-label">Sessions left</span>
+            <span className="metric-label">{t('Sessions left')}</span>
             <strong>{data?.remainingSessions ?? 6}</strong>
           </div>
         </div>
       </div>
 
       <div className="panel focus-panel">
-        <p className="eyebrow">Next class</p>
+        <p className="eyebrow">{t('Next class')}</p>
         <h2>{data?.nextClass ?? 'Evening Muay Thai Conditioning'}</h2>
         <div className="meta-row">
           <span>{nextBooking.day}</span>
           <span>{nextBooking.time}</span>
           <span>{nextBooking.trainer}</span>
         </div>
-        <button className="primary-btn">Check-in</button>
+        <button className="primary-btn">{t('Check-in')}</button>
       </div>
 
       <div className="panel table-panel">
         <div className="panel-header">
-          <h3>Upcoming bookings</h3>
-          <span className="chip">{data?.upcomingBookings?.length ?? 3} items</span>
+          <h3>{t('Upcoming bookings')}</h3>
+          <span className="chip">{data?.upcomingBookings?.length ?? 3} {t('items')}</span>
         </div>
 
         <div className="booking-list">
@@ -169,11 +174,11 @@ function TraineeDashboard() {
 
       <div className="panel summary-panel">
         <div className="panel-header">
-          <h3>Performance</h3>
+          <h3>{t('Performance')}</h3>
         </div>
         <div className="score-block">
           <span className="score-value">{data?.attendanceRate ?? 92}%</span>
-          <small>Attendance rate</small>
+          <small>{t('Attendance rate')}</small>
         </div>
       </div>
     </section>
@@ -181,6 +186,7 @@ function TraineeDashboard() {
 }
 
 function AdminDashboard() {
+  const { t } = useLanguage();
   const [data, setData] = useState(adminFallback);
 
   useEffect(() => {
@@ -201,18 +207,18 @@ function AdminDashboard() {
   }, []);
 
   const cards = [
-    { label: 'Active members', value: data.activeMembers },
-    { label: 'Classes today', value: data.todayClasses },
-    { label: 'Booked seats', value: data.bookedSeats },
-    { label: 'Pending payments', value: data.pendingPayments },
+    { label: t('Active members'), value: data.activeMembers },
+    { label: t('Classes today'), value: data.todayClasses },
+    { label: t('Booked seats'), value: data.bookedSeats },
+    { label: t('Pending payments'), value: data.pendingPayments },
   ];
 
   return (
     <section className="page-grid admin-grid">
       <div className="panel hero-panel wide-panel">
         <div>
-          <p className="eyebrow">Admin dashboard</p>
-          <h1>Operations overview</h1>
+          <p className="eyebrow">{t('Admin dashboard')}</p>
+          <h1>{t('Operations overview')}</h1>
         </div>
         <div className="stat-grid">
           {cards.map((card) => (
@@ -226,13 +232,13 @@ function AdminDashboard() {
 
       <div className="panel table-panel">
         <div className="panel-header">
-          <h3>Packages nearing expiry</h3>
-          <span className="chip">{data.packagesNearExpiry} items</span>
+          <h3>{t('Packages nearing expiry')}</h3>
+          <span className="chip">{data.packagesNearExpiry} {t('items')}</span>
         </div>
         <ul className="list-compact">
-          <li>10 Sessions - 3 members</li>
-          <li>Monthly Unlimited - 5 members</li>
-          <li>Personal Training - 2 members</li>
+          <li>{t('10 Sessions - 3 members')}</li>
+          <li>{t('Monthly Unlimited - 5 members')}</li>
+          <li>{t('Personal Training - 2 members')}</li>
         </ul>
       </div>
     </section>
@@ -240,12 +246,13 @@ function AdminDashboard() {
 }
 
 function ClassSchedule() {
+  const { t } = useLanguage();
   return (
     <section className="page-grid">
       <div className="panel table-panel full-span">
         <div className="panel-header">
-          <h3>Class schedule</h3>
-          <span className="chip">This week</span>
+          <h3>{t('Class schedule')}</h3>
+          <span className="chip">{t('This week')}</span>
         </div>
 
         <div className="schedule-table">
@@ -255,7 +262,7 @@ function ClassSchedule() {
               <strong>{item.className}</strong>
               <span>{item.trainer}</span>
               <span>{item.capacity}</span>
-              <span className={`status-badge ${item.status.toLowerCase().replace(/\s+/g, '-')}`}>{item.status}</span>
+              <span className={`status-badge ${item.status.toLowerCase().replace(/\s+/g, '-')}`}>{t(item.status)}</span>
             </div>
           ))}
         </div>
@@ -266,8 +273,8 @@ function ClassSchedule() {
 
 export function App() {
   return (
-    <BrowserRouter>
+    <LanguageProvider><BrowserRouter>
       <AppShell />
-    </BrowserRouter>
+    </BrowserRouter></LanguageProvider>
   );
 }
