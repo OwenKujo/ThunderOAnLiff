@@ -208,17 +208,18 @@ model Trainer {
 }
 
 model ClassSchedule {
-  id        String      @id @default(cuid())
-  trainerId String?
-  title     String
-  startAt   DateTime
-  endAt     DateTime
-  location  String?
-  capacity  Int         @default(12)
-  status    ClassStatus @default(OPEN)
-  notes     String?
-  createdAt DateTime    @default(now())
-  updatedAt DateTime    @updatedAt
+  id          String      @id @default(cuid())
+  trainerId   String?
+  scheduleKey String?     @unique
+  title       String
+  startAt     DateTime
+  endAt       DateTime
+  location    String?
+  capacity    Int         @default(12)
+  status      ClassStatus @default(OPEN)
+  notes       String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
 
   trainer    Trainer?     @relation(fields: [trainerId], references: [id], onDelete: SetNull)
   bookings   Booking[]

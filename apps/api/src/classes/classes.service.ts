@@ -4,10 +4,18 @@ import { PrismaService } from '../prisma/prisma.service';
 import { LineMessagingService } from '../line/line-messaging.service';
 import { CreateClassDto } from './dto/create-class.dto';
 import { SEAT_OCCUPYING_BOOKING_STATUSES } from '../bookings/booking-policy';
+import { buildGroupClassOccurrences } from './group-class-schedule';
 
 @Injectable()
 export class ClassesService {
   constructor(private readonly prisma: PrismaService, private readonly messaging: LineMessagingService) {}
+
+  private async ensureGroupClasses(fromDate: Date, toDate: Date) {
+    const occurrences = buildGroupClassOccurrences(fromDate, toDate);
+    if (occurrences.length) {
+      await this.prisma.classSchedule.createMany({ data: occurrences, skipDuplicates: true });
+    }
+  }
 
   async list(from?: string, to?: string, includeClosed = false) {
     const fromDate = from ? new Date(from) : new Date();
@@ -15,6 +23,7 @@ export class ClassesService {
     if (Number.isNaN(fromDate.getTime()) || Number.isNaN(toDate.getTime()) || fromDate >= toDate) {
       throw new BadRequestException('The class date range is invalid.');
     }
+    await this.ensureGroupClasses(fromDate, toDate);
     const classes = await this.prisma.classSchedule.findMany({
       where: { startAt: { gte: fromDate, lt: toDate }, ...(includeClosed ? {} : { status: ClassStatus.OPEN }) },
       include: {

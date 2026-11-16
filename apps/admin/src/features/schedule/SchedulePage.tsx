@@ -65,8 +65,8 @@ export function SchedulePage() {
   }
 
   return <div className="page-stack">
-    <PageHeader eyebrow="SCHEDULING" title="Class schedule" description="Create classes, manage capacity and keep trainer availability conflict-free." action={<button className="button button-primary" onClick={() => setShowForm((value) => !value)}>＋ Schedule class</button>} />
-    {showForm && <Panel title="Schedule a class" subtitle="Class times are interpreted and displayed in Asia/Bangkok."><form className="form-grid" onSubmit={submit}>
+    <PageHeader eyebrow="SCHEDULING" title="Class schedule" description="MuayThai Group Classes are scheduled automatically at the fixed weekly times. Add private classes here." action={<button className="button button-primary" onClick={() => setShowForm((value) => !value)}>＋ Schedule private class</button>} />
+    {showForm && <Panel title="Schedule a private class" subtitle="Group classes are generated automatically. Private class times are interpreted and displayed in Asia/Bangkok."><form className="form-grid" onSubmit={submit}>
       <Field label="Class name"><input name="title" required minLength={2} maxLength={120} placeholder="Muay Thai Conditioning" /></Field>
       <Field label="Trainer"><select name="trainerId" defaultValue=""><option value="">No trainer assigned</option>{trainers.data?.filter((trainer) => trainer.isActive).map((trainer) => <option key={trainer.id} value={trainer.id}>{trainer.name}{trainer.specialty ? ` — ${trainer.specialty}` : ''}</option>)}</select></Field>
       <Field label="Start date and time"><input name="startAt" type="datetime-local" required /></Field>

@@ -112,6 +112,7 @@ This is only valid if the live database really matches the baseline. If it has d
 ## Domain rules implemented
 
 - A trainee must have an active membership and a usable entitlement to book. Admin-created bookings use the same membership, overlap, capacity, entitlement, and credit-reservation rules as trainee-created bookings.
+- MuayThai Group Classes are generated automatically when class schedules are requested: 09:00, 10:30, 13:30, 15:00, 16:30, 18:00, and 19:30 Monday–Friday; weekends omit 19:30. Times are Asia/Bangkok, each class lasts 90 minutes, and private classes remain manually scheduled by admins.
 - Booking checks class status, start time, duplicate bookings, overlapping bookings, capacity, and entitlement balance within a serializable database transaction. Shared, unit-tested booking policy helpers keep seat occupancy and time cutoffs consistent across modules.
 - Finite session credits are reserved at booking time and recorded in `CreditLedger`; eligible cancellations and studio cancellation return credits with idempotency keys.
 - Cancellation is allowed up to (and including) 60 minutes before a class starts. The API is the source of truth; frontend timing is only a usability hint.
